@@ -10,7 +10,7 @@ import tensorflow.keras
 directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/train"
 
 class_names = sorted(os.listdir(directory))
-
+print(class_names)
 base_model = tf.keras.applications.mobilenet.MobileNet(input_shape = (224,224,3),include_top = False)
 base_model.summary
 
@@ -33,8 +33,12 @@ X = [] # Feature vectors will go here.
 y = [] # Class ids will go here.
 
 for root, dirs, files in os.walk(directory):
+    #print(dirs)
     for name in files:
+        #print(files)
         if name.endswith('.jpg'):
+            path = os.path.join(root, name)
+            print(path)
             # Load the image:
             img = plt.imread(root + os.sep + name)
             # Resize it to the net input size:
@@ -47,9 +51,9 @@ for root, dirs, files in os.walk(directory):
             # And append the feature vector to our list.
             X.append(x)
             print(name)
+            print(os.sep)
             # Extract class name from the directory name:
-            label = name.split(os.sep)[-2]
-            label = os.path.dirname(name)
+            label = path.split(os.sep)[-2]
             print(label)
             y.append(class_names.index(label))
             print(name)
@@ -72,7 +76,7 @@ svml = sklearn.svm.SVC(kernel='linear')
 svml.fit(Train_X,Train_y)
 classifiers.append(svml)
 
-svmrbf = sklearn.svm.svc(kernel= 'rbf')
+svmrbf = sklearn.svm.SVC(kernel= 'rbf')
 svmrbf.fit(Train_X,Train_y)
 classifiers.append(svmrbf)
 
@@ -85,7 +89,6 @@ forest.fit(Train_X,Train_y)
 classifiers.append(forest)
 
 for i in classifiers:
-    pred = i.classify(test_X)
-    score = sklearn.metrics.accuracy_score(y_test,pred)
-    print(i, score)
-
+    pred = i.predict(test_X)
+    score = sklearn.metrics.accuracy_score(test_y,pred)
+    print(score)
