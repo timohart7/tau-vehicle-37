@@ -102,3 +102,14 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+<<<<<<< Updated upstream
+# Dataset
+data/
+=======
+# vscode
+.vscode/
+
+# DataSets
+data/
+>>>>>>> Stashed changes
