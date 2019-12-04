@@ -37,7 +37,7 @@ for root, dirs, files in os.walk(directory):
             # Load the image:
             img = plt.imread(root + os.sep + name)
             # Resize it to the net input size:
-            img = cv2.resize(img, (128,128))
+            img = cv2.resize(img, (224,224))
             img = img.astype(np.float32)
             img -= 128
             #img = np.concatenate((img,bias),axis=2)
@@ -56,10 +56,15 @@ for root, dirs, files in os.walk(directory):
 X = np.array(X)
 y = tf.keras.utils.to_categorical(np.array(y))
 
+weights = [4,3,1,1,1,1,5,3,2,5,1,4,4,3,2,1,1]
+Train_X, test_X, Train_y, test_y= sklearn.model_selection.train_test_split(X,y,test_size=0.2)
+del X
+del y
+
 #############
 # MobileNet #
 #############
-
+'''
 base_model = tf.keras.applications.mobilenet.MobileNet(input_shape = (128,128,3),include_top = False)
 #base_model.summary()
 
@@ -78,22 +83,21 @@ model.layers[-8].trainable = True
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
 
-Train_X, test_X, Train_y, test_y= sklearn.model_selection.train_test_split(X,y,test_size=0.2)
-del X
-del y
 
-weights = [3,3,1,1,1,4,2,1.5,4,1,2,2,2,1.5,1,1]
+
+
+
 
 model.fit(Train_X,Train_y, epochs=10, batch_size=16,validation_data = (test_X, test_y), class_weight = weights)
 model.save('Mobilenet_Jussi.h5')
 
 del model
-
+'''
 ################
 # MobileNet_v2 #
 ################
 
-base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (128,128,3),include_top = False)
+base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
 w = base_model.output
@@ -111,8 +115,8 @@ model.layers[-8].trainable = True
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
 
-model.fit(Train_X,Train_y, epochs=10, batch_size=16,validation_data = (test_X, test_y), class_weight = weights)
-model.save('MobilenetV2_Jussi.h5')
+model.fit(Train_X,Train_y, epochs=15, batch_size=6,validation_data = (test_X, test_y), class_weight = weights)
+model.save('MobilenetV2_Jussi_v2.h5')
 
 del model
 
@@ -120,7 +124,7 @@ del model
 # InceptionV3 #
 ###############
 
-base_model = tf.keras.applications.inception_v3.InceptionV3(input_shape = (128,128,3),include_top = False)
+base_model = tf.keras.applications.inception_v3.InceptionV3(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
 w = base_model.output
@@ -136,8 +140,10 @@ model.layers[-8].trainable = True
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
 
-model.fit(Train_X,Train_y, epochs=10, batch_size=16,validation_data = (test_X, test_y), class_weight = weights)
-model.save('InceptionV3_Jussi.h5')
+#model = tf.keras.models.load_model('InceptionV3_Jussi.h5')
+
+model.fit(Train_X,Train_y, epochs=20, batch_size=6,validation_data = (test_X, test_y), class_weight = weights)
+model.save('InceptionV3_Jussi_v2.h5')
 
 del model
 

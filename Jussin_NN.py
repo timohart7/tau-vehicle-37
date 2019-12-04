@@ -76,7 +76,7 @@ Train_X, test_X, Train_y, test_y= sklearn.model_selection.train_test_split(X,y,t
 del X
 del y
 
-weights = [3,3,1,1,1,4,2,1.5,4,1,2,2,2,1.5,1,1]
+weights = [3,3,1,1,1,1,4,2,1.5,4,1,2,2,2,1.5,1,1]
 
 model.fit(Train_X,Train_y, epochs=10, batch_size=16,validation_data = (test_X, test_y), class_weight = weights)
 

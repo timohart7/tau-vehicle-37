@@ -2,4 +2,4 @@ Lda classifier: 0.7682296309502585
 linear svm classifier: 0.7377429131752541
 rbf svm classifier: 0.7881975396683901
 logistic regression classifier: 0.7614548047780353
-ranadom forest n=100: 0.6808700303084328
+random forest n=100: 0.6808700303084328

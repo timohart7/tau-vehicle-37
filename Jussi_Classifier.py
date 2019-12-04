@@ -17,10 +17,16 @@ import sklearn
 from sklearn import linear_model, svm, ensemble, discriminant_analysis, model_selection, metrics, naive_bayes
 import h5py
 
-model1 = tf.keras.models.load_model('ResNet50_Jussi.h5')
-#model2 = tf.keras.models.load_model('Mobilenet_Jussi.h5')
-model3 = tf.keras.models.load_model('MobilenetV2_Jussi.h5')
-model4 = tf.keras.models.load_model('InceptionV3_Jussi.h5')
+def majority_vote(prediction):
+    y = np.sum(tf.keras.utils.to_categorical(np.array(prediction),17),0)
+
+    if np.max(y) ==1:
+        return prediction[0]
+    return np.argmax(y)
+
+
+
+
 
 base_model = tf.keras.applications.mobilenet.MobileNet(input_shape = (224,224,3),include_top = False)
 base_model.summary
@@ -50,9 +56,7 @@ print(class_names)
 
 X = [] # Feature vectors will go here.
 y = [] # Class ids will go here.
-#bias = np.zeros((128,128,1))
 
-data = []
 
 for root, dirs, files in os.walk(directory):
     #print(dirs)
@@ -62,25 +66,14 @@ for root, dirs, files in os.walk(directory):
             path = os.path.join(root, name)
             print(path)
             # Load the image:
-            im = plt.imread(root + os.sep + name)
+            img = plt.imread(root + os.sep + name)
             # Resize it to the net input size:
-
-            img = cv2.resize(im, (128,128))
+            img = cv2.resize(img, (224,224))
+            # Convert the data to float, and remove mean:
             img = img.astype(np.float32)
             img -= 128
-            pred1 = model1.predict(img[np.newaxis, ...])
-            #pred2 = model2.predict(img[np.newaxis, ...])
-            pred3 = model3.predict(img[np.newaxis, ...])
-            pred4 = model4.predict(img[np.newaxis, ...])
-            pred = [np.argmax(pred1),np.argmax(pred3),np.argmax(pred4)]
-            data.append(pred)
-
-
-            img2 = cv2.resize(im, (224,224))
-            img2 = img2.astype(np.float32)
-            img2 -= 128
-            x = model.predict(img2[np.newaxis, ...])[0]
-            # Convert the data to float, and remove mean          
+            # Push the data through the model:
+            x = model.predict(img[np.newaxis, ...])[0]
             # And append the feature vector to our list.
             X.append(x)
             print(name)
@@ -93,42 +86,19 @@ for root, dirs, files in os.walk(directory):
 
 X = np.array(X)
 y = np.array(y)
-data = np.array(data)
 
 
 svmrbf = sklearn.svm.SVC(kernel= 'rbf')
 svmrbf.fit(X,y)
 
-pred = np.reshape(svmrbf.predict(X),(np.size(y),1))
-np.concatenate((data,pred),1)
 
-#############################
-# Test if idea works at all #                        
-#############################
-Train_X, test_X, Train_y, test_y= sklearn.model_selection.train_test_split(data,y,test_size=0.2)
-
-test_gnb = sklearn.naive_bayes.GaussianNB()
-test_gnb.fit(Train_X,Train_y)
-print(sklearn.metrics.accuracy_score(test_y,test_gnb.predict(test_X)))
-
-
-# reclaim memory
-del test_gnb
-del Train_X
-del test_X
-del Train_y
-del test_y
-#####################################################
-# Train w full dataset
-
-gnb = sklearn.naive_bayes.GaussianNB()
-gnb.fit(data,y)
-
-####################################################
-
+del X
+del y
 test_files = 'C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/test/testset'
 
-Test = []
+TestNN = []
+TestSVM =[]
+
 
 for file in os.listdir(test_files):
         if file.endswith('.jpg'):
@@ -139,29 +109,38 @@ for file in os.listdir(test_files):
             img = cv2.resize(im, (128,128))
             img = img.astype(np.float32)
             img -= 128
-            pred1 = model1.predict(img[np.newaxis, ...])
-            #pred2 = model2.predict(img[np.newaxis, ...])
-            pred3 = model3.predict(img[np.newaxis, ...])
-            pred4 = model4.predict(img[np.newaxis, ...])
-            
-            
+            TestNN.append(img)
+
             img2 = cv2.resize(im, (224,224))
             img2 = img2.astype(np.float32)
             img2 -= 128
             x = model.predict(img2[np.newaxis, ...])[0]
-            linearpred = svmrbf.predict(X)
-            pred = [np.argmax(pred1),np.argmax(pred3),np.argmax(pred4),linearpred]
-            Test.append(pred)
+            TestSVM.append(x)
+            print(file)
 
-Test = np.array(Test)            
+TestNN = np.array(TestNN)   
+TestSVM = np.array(TestSVM)         
 
-with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission.csv", "w") as fp:
+model1 = tf.keras.models.load_model('ResNet50_Jussi.h5')
+model3 = tf.keras.models.load_model('MobilenetV2_Jussi.h5')
+model4 = tf.keras.models.load_model('InceptionV3_Jussi_v2.h5')
+
+pred0 = np.argmax(np.array(model1.predict(TestNN)),1).reshape((-1,1))
+pred1 = np.argmax(np.array(model4.predict(TestNN)),1).reshape((-1,1))
+pred2 = np.argmax(np.array(model3.predict(TestNN)),1).reshape((-1,1))
+pred3 = np.array(svmrbf.predict(TestSVM)).reshape((-1,1))
+
+pred = np.concatenate((pred0,pred1,pred2,pred3), axis = 1)
+
+
+with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission3.csv", "w") as fp:
     fp.write("Id,Category\n")
     i = 0
 
-    pred = gnb.predict(Test)
-    for prediction in pred:
-        label = class_names[prediction] 
+
+
+    for i in range(pred.shape[0]):
+        label = class_names[majority_vote(pred[i])] 
 
         fp.write("%d,%s\n" % (i, label))
         i +=1
