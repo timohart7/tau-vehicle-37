@@ -13,91 +13,27 @@ from keras.applications.mobilenet import MobileNet
 from keras.applications.mobilenet_v2 import MobileNetV2
 from keras.applications.inception_v3 import InceptionV3
 from keras.applications.resnet50 import ResNet50
-import sklearn
-from sklearn import linear_model, svm, ensemble, discriminant_analysis, model_selection, metrics, naive_bayes
 import h5py
-
-def majority_vote(prediction):
-    y = np.sum(tf.keras.utils.to_categorical(np.array(prediction),17),0)
-
-    if np.max(y) ==1:
-        return prediction[0]
-    return np.argmax(y)
-
-
-
-
-
-base_model = tf.keras.applications.mobilenet.MobileNet(input_shape = (224,224,3),include_top = False)
-base_model.summary
-
-in_tensor = base_model.inputs[0]# Grab the input of base model
-out_tensor = base_model.outputs[0]# Grab the output of base model
-
-# Add an average pooling layer (averaging each of the 1024 channels):
-out_tensor = tf.keras.layers.GlobalAveragePooling2D()(out_tensor)
-
-# Define the full model by the endpoints.
-model = tf.keras.models.Model(inputs  = [in_tensor],outputs = [out_tensor])
-
-# Compile the model for execution. Losses and optimizers
-# can be anything here, since we don’t train the model.
-model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd')
+import efficientnet.tfkeras
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
 directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/train"
 
 class_names = sorted(os.listdir(directory))
 
-print(class_names)
+
+def majority_vote(prediction):
+    y = np.sum(np.array(prediction),1)
+
+    return np.argmax(y)
 
 
-# Find all image files in the data directory.
 
-X = [] # Feature vectors will go here.
-y = [] # Class ids will go here.
-
-
-for root, dirs, files in os.walk(directory):
-    #print(dirs)
-    for name in files:
-        #print(files)
-        if name.endswith('.jpg'):
-            path = os.path.join(root, name)
-            print(path)
-            # Load the image:
-            img = plt.imread(root + os.sep + name)
-            # Resize it to the net input size:
-            img = cv2.resize(img, (224,224))
-            # Convert the data to float, and remove mean:
-            img = img.astype(np.float32)
-            img -= 128
-            # Push the data through the model:
-            x = model.predict(img[np.newaxis, ...])[0]
-            # And append the feature vector to our list.
-            X.append(x)
-            print(name)
-            print(os.sep)
-            # Extract class name from the directory name:
-            label = path.split(os.sep)[-2]
-            print(label)
-            y.append(class_names.index(label))
-            print(name)
-
-X = np.array(X)
-y = np.array(y)
-
-
-svmrbf = sklearn.svm.SVC(kernel= 'rbf')
-svmrbf.fit(X,y)
-
-
-del X
-del y
 test_files = 'C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/test/testset'
 
-TestNN = []
-TestSVM =[]
+TestNN128 = []
+TestNN224 =[]
 
 
 for file in os.listdir(test_files):
@@ -109,38 +45,46 @@ for file in os.listdir(test_files):
             img = cv2.resize(im, (128,128))
             img = img.astype(np.float32)
             img -= 128
-            TestNN.append(img)
+            TestNN128.append(img)
 
             img2 = cv2.resize(im, (224,224))
             img2 = img2.astype(np.float32)
             img2 -= 128
-            x = model.predict(img2[np.newaxis, ...])[0]
-            TestSVM.append(x)
+            TestNN224.append(img2)
             print(file)
 
-TestNN = np.array(TestNN)   
-TestSVM = np.array(TestSVM)         
+TestNN128 = np.array(TestNN128)   
+TestNN224 = np.array(TestNN224)         
 
+#128 models
 model1 = tf.keras.models.load_model('ResNet50_Jussi.h5')
-model3 = tf.keras.models.load_model('MobilenetV2_Jussi.h5')
-model4 = tf.keras.models.load_model('InceptionV3_Jussi_v2.h5')
+model2 = tf.keras.models.load_model('InceptionV3_Jussi_v2.h5')
 
-pred0 = np.argmax(np.array(model1.predict(TestNN)),1).reshape((-1,1))
-pred1 = np.argmax(np.array(model4.predict(TestNN)),1).reshape((-1,1))
-pred2 = np.argmax(np.array(model3.predict(TestNN)),1).reshape((-1,1))
-pred3 = np.array(svmrbf.predict(TestSVM)).reshape((-1,1))
+#224 models
+model3 = tf.keras.models.load_model('InceptionV3_v4.h5')
+model4 = tf.keras.models.load_model('MobilenetV2_Jussi_v3.h5')
+model5 = tf.keras.models.load_model('ResNet50_v2.h5')
 
-pred = np.concatenate((pred0,pred1,pred2,pred3), axis = 1)
+pred0 = np.array(model1.predict(TestNN128)).reshape((-1,17,1))
+pred1 = np.array(model2.predict(TestNN128)).reshape((-1,17,1))
+del TestNN128
+pred2 = np.array(model3.predict(TestNN224)).reshape((-1,17,1))
+pred3 = np.array(model4.predict(TestNN224)).reshape((-1,17,1))
+pred4 = np.array(model5.predict(TestNN224)).reshape((-1,17,1))
 
 
-with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission3.csv", "w") as fp:
+
+pred = np.concatenate((pred0,pred1,pred2,pred3,pred4), axis = 2)
+
+
+with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission10.csv", "w") as fp:
     fp.write("Id,Category\n")
     i = 0
 
 
 
     for i in range(pred.shape[0]):
-        label = class_names[majority_vote(pred[i])] 
+        label = class_names[majority_vote(pred[i,:,:])] 
 
         fp.write("%d,%s\n" % (i, label))
         i +=1

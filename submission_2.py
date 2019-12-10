@@ -16,7 +16,7 @@ class_names = sorted(os.listdir(directory))
 print(class_names)
 
 
-test_files = 'C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/test'
+test_files = 'C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/test/testset'
 
 Test = []
 
@@ -25,7 +25,7 @@ for file in os.listdir(test_files):
             # Load the image:
             img = plt.imread(test_files + os.sep + file)
             # Resize it to the net input size:
-            img = cv2.resize(img, (300,300))
+            img = cv2.resize(img, (224,224))
             img = img.astype(np.float32)
             img -= 128
             #img = np.concatenate((img,bias),axis=2)
@@ -37,12 +37,12 @@ for file in os.listdir(test_files):
 
 Test = np.array(Test)
 
-model = tf.keras.models.load_model('C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/EfficientNet_v1.h5')
+model = tf.keras.models.load_model('C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/MobilenetV2_Jussi_v3.h5')
 
 pred=model.predict(Test)
 
 
-with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission10.csv", "w") as fp:
+with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission11.csv", "w") as fp:
     fp.write("Id,Category\n")
     i = 0
 
