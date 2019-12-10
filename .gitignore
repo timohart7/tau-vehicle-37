@@ -103,13 +103,15 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-<<<<<<< Updated upstream
 # Dataset
-data/
-=======
-# vscode
-.vscode/
+*.jpg
+.jpg
 
-# DataSets
-data/
->>>>>>> Stashed changes
+# CNNs
+.h5
+*.h5
+.zip
+*.zip
+
+# VScode var
+.vscode

@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
 from sklearn import model_selection
-import cv2
+#import cv2
 import tensorflow as tf
 import tensorflow.keras
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -21,11 +21,11 @@ import h5py
 
 ###########################################################################
 #set file paths
-Train_directory = "F:/NN/train/train"
-Val_directory = Val_directory = "F:/NN/train/Validation"
+Train_directory = "./data/train/train"
+Val_directory = Val_directory = "./data/Validation"
 
 #set Batch size (int) set as high as you can without gettim OOM error
-BatchSize = 6
+BatchSize = 18
 ############################################################################
 
 class_names = sorted(os.listdir(Train_directory))
@@ -140,7 +140,7 @@ model.fit_generator(generator=train_generator,
                     steps_per_epoch=STEP_SIZE_TRAIN,
                     validation_data=val_generator,
                     validation_steps=STEP_SIZE_VALID,
-                    epochs=20,
+                    epochs=30,
                     class_weight= weights
 )
 
