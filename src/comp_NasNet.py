@@ -5,15 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
 from sklearn import model_selection
-#import cv2
+import cv2
 import tensorflow as tf
 import tensorflow.keras
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.layers import Dense, Activation, Flatten
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications.densenet import DenseNet121
+from tensorflow.keras.applications.resnet50 import ResNet50
 import h5py
-
 
 
 ########
@@ -22,16 +21,15 @@ import h5py
 
 ###########################################################################
 #set file paths
-<<<<<<< HEAD
-Train_directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/train"
-Val_directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/Validation"
-=======
-Train_directory = "./data/train/train"
-Val_directory = Val_directory = "./data/Validation"
->>>>>>> 2febbeba26959e5361e1cb20f60d244039f000aa
+Train_directory = "C:/Data/tau-vehicle-37/tau-vehicle-37/data/train/train"
+Val_directory = Val_directory = "C:/Data/tau-vehicle-37/tau-vehicle-37/data/Validation"
 
 #set Batch size (int) set as high as you can without gettim OOM error
-BatchSize = 18
+BatchSize = 12
+Epochs = 5
+InputShape = (150,150,3)
+#set class weights
+weights = [4,3,1,1,1,1,5,3,2,5,1,4,4,3,2,1,1]
 ############################################################################
 
 class_names = sorted(os.listdir(Train_directory))
@@ -85,25 +83,17 @@ del y
 
 
 #create a image augmentor
-train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range = 60, height_shift_range= 80, 
-horizontal_flip = False, vertical_flip = True, width_shift_range=80, zoom_range=[0.5,1.0])
+train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range = 20, height_shift_range= 50, 
+horizontal_flip = False, vertical_flip = True, width_shift_range=50, zoom_range=[0.5,1.0])
+
+#No Augmentation for val data
 val_datagen = tf.keras.preprocessing.image.ImageDataGenerator()
 
-#create generators which read images from hard drive only one batch at a time
-train_generator1 = val_datagen.flow_from_directory(
-    directory=Train_directory,
-    target_size=(224,224),
-    color_mode="rgb",
-    batch_size=BatchSize,
-    classes = class_names,
-    class_mode="categorical",
-    shuffle=True,
-    seed=42
-)
 
-train_generator2 = train_datagen.flow_from_directory(
+#create generators which read images from hard drive only one batch at a time
+train_generator = train_datagen.flow_from_directory(
     directory=Train_directory,
-    target_size=(224,224),
+    target_size=(150,150),
     color_mode="rgb",
     batch_size=BatchSize,
     classes = class_names,
@@ -114,7 +104,7 @@ train_generator2 = train_datagen.flow_from_directory(
 
 val_generator = val_datagen.flow_from_directory(
     directory=Val_directory,
-    target_size=(224,224),
+    target_size=(150, 150),
     color_mode="rgb",
     batch_size=BatchSize,
     classes = class_names,
@@ -122,57 +112,41 @@ val_generator = val_datagen.flow_from_directory(
     shuffle=True,
     seed=42
 )
-
-
-#set class weights
-weights = [5,4,1,1,1,1,6,2,2,5,1,4,5,3,2,1,1]
-
 #prepare model
-
-base_model = tf.keras.applications.densenet.DenseNet121(include_top=True, weights='imagenet')
+base_model = tf.keras.applications.inception_resnet_v2.InceptionResNetV2(include_top=False,
+                                                                         weights='imagenet', input_tensor=None, input_shape=InputShape, pooling='max', classes=17)
 #base_model.summary()
-
-
 
 w = base_model.output
 w = Flatten()(w)
-w = Dense(1024, activation = "relu")(w)
-w = Dense(1024, activation = "relu")(w)
-w = Dense(512, activation = "relu")(w)
+w = Dense(256, activation = "relu")(w)
+w = Dense(128, activation = "relu")(w)
 output = Dense(17, activation = "sigmoid")(w)
 # Compile the model for execution. Losses and optimizers
 # can be anything here, since we don’t train the model.
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
 
+model.layers[-6].trainable = True
+model.layers[-7].trainable = True
+model.layers[-8].trainable = True
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
 
 
-#model = tf.keras.models.load_model('MobilenetV2_Jussi_v2.h5')
 
 
-
-
+#model.fit(Train_X,Train_y, epochs=10, batch_size=16,validation_data = (test_X, test_y), class_weight = weights)
 
 #get value for batches to generate per epoch
-STEP_SIZE_TRAIN=train_generator1.n//train_generator1.batch_size
+STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 STEP_SIZE_VALID=val_generator.n//val_generator.batch_size
 
 #train NN
-model.fit_generator(generator=train_generator1,
+model.fit_generator(generator=train_generator,
                     steps_per_epoch=STEP_SIZE_TRAIN,
                     validation_data=val_generator,
                     validation_steps=STEP_SIZE_VALID,
-                    epochs=8,
-                    class_weight= weights
-)
-
-
-model.fit_generator(generator=train_generator2,
-                    steps_per_epoch=STEP_SIZE_TRAIN,
-                    validation_data=val_generator,
-                    validation_steps=STEP_SIZE_VALID,
-                    epochs=30,
+                    epochs=Epochs,
                     class_weight= weights
 )
 
@@ -182,8 +156,6 @@ model.fit_generator(generator=train_generator2,
 #del test_X
 #del test_y
 
-
 #Save model to file
-model.save('Densenet121_v1.h5')
-del model
+model.save('Comp_Inception-resnet.h5')
 
