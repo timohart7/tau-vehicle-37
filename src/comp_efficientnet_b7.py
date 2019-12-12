@@ -60,7 +60,7 @@ del y
 # EfficientNet #
 ################
 
-base_model = base_model = efficientnet.tfkeras.EfficientNetB7(weights='imagenet', include_top = False)
+base_model = base_model = efficientnet.tfkeras.EfficientNetB7(weights='imagenet', input_shape = (224,224,3), include_top = False)
 #base_model.summary()
 
 w = base_model.output
@@ -72,10 +72,6 @@ output = Dense(17, activation = "sigmoid")(w)
 # Compile the model for execution. Losses and optimizers
 # can be anything here, since we don’t train the model.
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
-
-model.layers[-6].trainable = True
-model.layers[-7].trainable = True
-model.layers[-8].trainable = True
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
 
