@@ -37,12 +37,12 @@ for file in os.listdir(test_files):
 
 Test = np.array(Test)
 
-model = tf.keras.models.load_model('C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/MobilenetV2_Jussi_v3.h5')
+model = tf.keras.models.load_model('EfficientNetB7_Timo_224x224ep15.h5')
 
 pred=model.predict(Test)
 
 
-with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission11.csv", "w") as fp:
+with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submissionEffNetTimo.csv", "w") as fp:
     fp.write("Id,Category\n")
     i = 0
 
@@ -51,4 +51,5 @@ with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submission11.csv", 
         label = class_names[np.argmax(pred[i])] 
 
         fp.write("%d,%s\n" % (i, label))
+        #fp.write("%d,%s\n" % (i, pred[i]))
         i +=1

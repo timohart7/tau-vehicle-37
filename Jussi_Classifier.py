@@ -18,7 +18,7 @@ import efficientnet.tfkeras
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from NNTreeJussi_Test import JussiTree
 
-directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/train"
+directory = "train/train"
 
 class_names = sorted(os.listdir(directory))
 
@@ -32,7 +32,7 @@ def majority_vote(prediction):
 
 
 
-test_files = 'C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/test/testset'
+test_files = 'test/testset'
 
 #TestNN128 = []
 TestNN224 =[]
@@ -72,32 +72,42 @@ tf.keras.backend.clear_session()
 #224 models
 model0 = tf.keras.models.load_model('Eff_comp_noDataAug_re2.h5')
 pred0 = np.array(model0.predict(TestNN224)).reshape((-1,17,1))
+del model0
 tf.keras.backend.clear_session()
 model1 = tf.keras.models.load_model('EfficientNetB7_Timo_224x224ep15.h5')
 pred1 = np.array(model1.predict(TestNN224)).reshape((-1,17,1))
+del model1
 tf.keras.backend.clear_session()
 #pred6 = JussiTree(TestNN224).reshape((-1,1))
 
+model4 = tf.keras.models.load_model('EffNetB4.h5')
+pred4 = np.array(model4.predict(TestNN224)).reshape((-1,17,1))
+del model4
+tf.keras.backend.clear_session()
 
-#model2 = tf.keras.models.load_model('InceptionV3_v4.h5')
+model2 = tf.keras.models.load_model('InceptionV3_v4.h5')
 model3 = tf.keras.models.load_model('MobilenetV2_Jussi_v3.h5')
 #model5 = tf.keras.models.load_model('ResNet50_v2.h5')
 
-#pred2 = np.array(model2.predict(TestNN224)).reshape((-1,17,1))
+
+pred2 = np.array(model2.predict(TestNN224)).reshape((-1,17,1))
 pred3 = np.array(model3.predict(TestNN224)).reshape((-1,17,1))
 #pred4 = np.argmax(np.array(model5.predict(TestNN224)),1).reshape((-1,1))
+del model2
+del model3
+tf.keras.backend.clear_session()
+
+model5 = tf.keras.models.load_model('Xception_Timo_224x224ep16aug.h5')
+pred5 = np.array(model5.predict(TestNN224)).reshape((-1,17,1))
+del model5
 tf.keras.backend.clear_session()
 
 
 
+pred = np.concatenate((pred0,pred0,pred1,pred1,pred2,pred3,pred4,pred4,pred5), axis = 2)
 
 
-
-
-pred = np.concatenate((pred0,pred0,pred1,pred1,pred3), axis = 2)
-
-
-with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submissionMajvote_13_12_2.csv", "w") as fp:
+with open("submissionMajvote_13_12_3.csv", "w") as fp:
     fp.write("Id,Category\n")
     #fp.write("Id,128ResNet,128Inception,Inception,MobNetV2,ResNet50,Tree\n")
     i = 0

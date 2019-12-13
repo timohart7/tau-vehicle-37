@@ -56,7 +56,7 @@ dirBike= 'C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/Bike'
 #Layer 1
 
 datagen = tf.keras.preprocessing.image.ImageDataGenerator()
-'''
+
 #create generators which read images from hard drive only one batch at a time
 train_generator = datagen.flow_from_directory(
     directory=dir1,
@@ -68,7 +68,7 @@ train_generator = datagen.flow_from_directory(
     shuffle=True,
     seed=42
 )
-
+'''
 base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
@@ -82,7 +82,9 @@ output = Dense(8, activation = "sigmoid")(w)
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
+'''
 
+model = tf.keras.models.load_model('Layer1_Jussi_MobnetV2.h5')
 #get value for batches to generate per epoch
 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 
@@ -101,7 +103,7 @@ del train_generator
 ###############
 #Layer aquatic#
 ###############
-
+'''
 train_generator = datagen.flow_from_directory(
     directory=dirAq,
     target_size=(224,224),
@@ -140,7 +142,7 @@ model.fit_generator(generator=train_generator,
 model.save('LayerAq_Jussi_MobnetV2.h5')
 del model
 del train_generator
-
+'''
 ##################
 #Layer Automobile#
 ##################
@@ -155,7 +157,7 @@ train_generator = datagen.flow_from_directory(
     shuffle=True,
     seed=42
 )
-
+'''
 base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
@@ -169,7 +171,8 @@ output = Dense(2, activation = "sigmoid")(w)
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
-
+'''
+model = tf.keras.models.load_model('LayerAuto_Jussi_MobnetV2.h5')
 #get value for batches to generate per epoch
 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 
@@ -183,7 +186,7 @@ model.fit_generator(generator=train_generator,
 model.save('LayerAuto_Jussi_MobnetV2.h5')
 del model
 del train_generator
-
+tf.keras.backend.clear_session()
 #####################
 #Layer LargeVehicles#
 #####################
@@ -199,6 +202,8 @@ train_generator = datagen.flow_from_directory(
     seed=42
 )
 
+model = tf.keras.models.load_model('LayerLarge_Jussi_MobnetV2.h5')
+'''
 base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
@@ -212,7 +217,7 @@ output = Dense(3, activation = "sigmoid")(w)
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
-
+'''
 #get value for batches to generate per epoch
 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 
@@ -226,7 +231,7 @@ model.fit_generator(generator=train_generator,
 model.save('LayerLarge_Jussi_MobnetV2.h5')
 del model
 del train_generator
-'''
+
 #####################
 #Layer SmallVehicles#
 #####################
@@ -242,6 +247,8 @@ train_generator = datagen.flow_from_directory(
     seed=42
 )
 
+model = tf.keras.models.load_model('LayerSmall_Jussi_MobnetV2.h5')
+'''
 base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
@@ -255,7 +262,7 @@ output = Dense(4, activation = "sigmoid")(w)
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
-
+'''
 #get value for batches to generate per epoch
 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 
@@ -269,7 +276,7 @@ model.fit_generator(generator=train_generator,
 model.save('LayerSmall_Jussi_MobnetV2.h5')
 del model
 del train_generator
-
+tf.keras.backend.clear_session()
 #####################
 #Layer Van#
 #####################
@@ -284,7 +291,7 @@ train_generator = datagen.flow_from_directory(
     shuffle=True,
     seed=42
 )
-
+'''
 base_model = tf.keras.applications.mobilenet_v2.MobileNetV2(input_shape = (224,224,3),include_top = False)
 #base_model.summary()
 
@@ -298,7 +305,8 @@ output = Dense(2, activation = "sigmoid")(w)
 model = Model(inputs = [base_model.inputs[0]], outputs = [output])
 
 model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd',metrics=['accuracy'])
-
+'''
+model = tf.keras.models.load_model('LayerVan_Jussi_MobnetV2.h5')
 #get value for batches to generate per epoch
 STEP_SIZE_TRAIN=train_generator.n//train_generator.batch_size
 
@@ -316,7 +324,7 @@ del train_generator
 ############
 #Layer Bike#
 ############
-
+'''
 train_generator = datagen.flow_from_directory(
     directory=dirBike,
     target_size=(224,224),
@@ -355,3 +363,4 @@ model.fit_generator(generator=train_generator,
 model.save('LayerBike_Jussi_MobnetV2.h5')
 del model
 del train_generator
+'''

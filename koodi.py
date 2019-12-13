@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import sklearn
-from sklearn import linear_model, svm, ensemble, discriminant_analysis, model_selection, metrics
+from sklearn import linear_model, svm,neighbors, ensemble, discriminant_analysis, model_selection, metrics
 import cv2
 import tensorflow as tf
 import tensorflow.keras
@@ -31,7 +31,7 @@ model.compile(loss = 'categorical_crossentropy', optimizer = 'sgd')
 
 X = [] # Feature vectors will go here.
 y = [] # Class ids will go here.
-
+'''
 for root, dirs, files in os.walk(directory):
     #print(dirs)
     for name in files:
@@ -57,38 +57,60 @@ for root, dirs, files in os.walk(directory):
             print(label)
             y.append(class_names.index(label))
             print(name)
+'''
+
+for root, dirs, files in os.walk(directory):
+    #print(dirs)
+    for name in files:
+        #print(files)
+        if name.endswith('.jpg'):
+            path = os.path.join(root, name)
+            print(path)
+            # Load the image:
+            img = plt.imread(root + os.sep + name)
+            # Resize it to the net input size:
+            img = cv2.resize(img, (128,128))
+            img = img.astype(np.float32)
+            img -= 128
+            #img = np.concatenate((img,bias),axis=2)
+
+            # Convert the data to float, and remove mean          
+            # And append the feature vector to our list.
+            X.append(img)
+            print(name)
+            print(os.sep)
+            # Extract class name from the directory name:
+            label = path.split(os.sep)[-2]
+            print(label)
+            y.append(class_names.index(label))
+            print(name)
+
 
 # Cast the python lists to a numpy array.
 X = np.array(X)
-print(X)
+X = X.reshape((X.shape[0],-1))
 y = np.array(y)
-
-Train_X, test_X, Train_y, test_y= sklearn.model_selection.train_test_split(X,y,test_size=0.2)
 
 
 classifiers = []
 
 lda = sklearn.discriminant_analysis.LinearDiscriminantAnalysis()
-lda.fit(Train_X,Train_y)
 classifiers.append(lda)
 
 svml = sklearn.svm.SVC(kernel='linear')
-svml.fit(Train_X,Train_y)
 classifiers.append(svml)
 
 svmrbf = sklearn.svm.SVC(kernel= 'rbf')
-svmrbf.fit(Train_X,Train_y)
 classifiers.append(svmrbf)
 
 lgr = sklearn.linear_model.LogisticRegression()
-lgr.fit(Train_X,Train_y)
 classifiers.append(lgr)
 
 forest = sklearn.ensemble.RandomForestClassifier(n_estimators=100)
-forest.fit(Train_X,Train_y)
 classifiers.append(forest)
 
+knn = sklearn.neighbors.KNeighborsClassifier()
+classifiers.append(knn)
+
 for i in classifiers:
-    pred = i.predict(test_X)
-    score = sklearn.metrics.accuracy_score(test_y,pred)
-    print(score)
+    print(sklearn.model_selection.cross_val_score(i,X,y))

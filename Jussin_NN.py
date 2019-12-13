@@ -2,16 +2,17 @@
 
 import os 
 import numpy as np
-import matplotlib.pyplot as plt
-import sklearn
-from sklearn import model_selection
+#import matplotlib.pyplot as plt
+#import sklearn
+#from sklearn import model_selection
 #import cv2
 import tensorflow as tf
 import tensorflow.keras
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.layers import Dense, Activation, Flatten
 from tensorflow.keras.models import Model
-from tensorflow.keras.applications.densenet import DenseNet121
+#from tensorflow.keras.applications.densenet import DenseNet121
+import efficientnet.tfkeras
 import h5py
 
 
@@ -22,13 +23,8 @@ import h5py
 
 ###########################################################################
 #set file paths
-<<<<<<< HEAD
-Train_directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/train"
-Val_directory = "C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/train/Validation"
-=======
 Train_directory = "./data/train/train"
 Val_directory = Val_directory = "./data/Validation"
->>>>>>> 2febbeba26959e5361e1cb20f60d244039f000aa
 
 #set Batch size (int) set as high as you can without gettim OOM error
 BatchSize = 18
@@ -85,8 +81,8 @@ del y
 
 
 #create a image augmentor
-train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range = 60, height_shift_range= 80, 
-horizontal_flip = False, vertical_flip = True, width_shift_range=80, zoom_range=[0.5,1.0])
+train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rotation_range = 30, height_shift_range= 0.2, 
+horizontal_flip = True, vertical_flip = False, width_shift_range=0.2, zoom_range=[0.5,1.0])
 val_datagen = tf.keras.preprocessing.image.ImageDataGenerator()
 
 #create generators which read images from hard drive only one batch at a time
@@ -100,7 +96,7 @@ train_generator1 = val_datagen.flow_from_directory(
     shuffle=True,
     seed=42
 )
-
+'''
 train_generator2 = train_datagen.flow_from_directory(
     directory=Train_directory,
     target_size=(224,224),
@@ -111,7 +107,7 @@ train_generator2 = train_datagen.flow_from_directory(
     shuffle=True,
     seed=42
 )
-
+'''
 val_generator = val_datagen.flow_from_directory(
     directory=Val_directory,
     target_size=(224,224),
@@ -129,7 +125,8 @@ weights = [5,4,1,1,1,1,6,2,2,5,1,4,5,3,2,1,1]
 
 #prepare model
 
-base_model = tf.keras.applications.densenet.DenseNet121(include_top=True, weights='imagenet')
+#base_model = tf.keras.applications.densenet.DenseNet121(include_top=True, weights='imagenet')
+base_model = efficientnet.tfkeras.EfficientNetB7(weights='imagenet')
 #base_model.summary()
 
 
