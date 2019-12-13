@@ -79,11 +79,11 @@ tf.keras.backend.clear_session()
 #pred6 = JussiTree(TestNN224).reshape((-1,1))
 
 
-model2 = tf.keras.models.load_model('InceptionV3_v4.h5')
+#model2 = tf.keras.models.load_model('InceptionV3_v4.h5')
 model3 = tf.keras.models.load_model('MobilenetV2_Jussi_v3.h5')
 #model5 = tf.keras.models.load_model('ResNet50_v2.h5')
 
-pred2 = np.array(model2.predict(TestNN224)).reshape((-1,17,1))
+#pred2 = np.array(model2.predict(TestNN224)).reshape((-1,17,1))
 pred3 = np.array(model3.predict(TestNN224)).reshape((-1,17,1))
 #pred4 = np.argmax(np.array(model5.predict(TestNN224)),1).reshape((-1,1))
 tf.keras.backend.clear_session()
@@ -94,10 +94,10 @@ tf.keras.backend.clear_session()
 
 
 
-pred = np.concatenate((pred0,pred0,pred1,pred1,pred2,pred3), axis = 2)
+pred = np.concatenate((pred0,pred0,pred1,pred1,pred3), axis = 2)
 
 
-with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submissionMajvote_13_12_1.csv", "w") as fp:
+with open("C:/Users/juspe/Documents/Koodailua/tau-vehicle-37/submissionMajvote_13_12_2.csv", "w") as fp:
     fp.write("Id,Category\n")
     #fp.write("Id,128ResNet,128Inception,Inception,MobNetV2,ResNet50,Tree\n")
     i = 0
